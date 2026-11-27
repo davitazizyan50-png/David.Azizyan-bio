@@ -1,0 +1,2043 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>David Azizyan — Personal Portfolio & Interactive Lab</title>
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          }
+        }
+      }
+    };
+  </script>
+  <!-- Three.js r128 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Frosted Dark Glassmorphism + Cursor Spotlight & Scroll Reveal Choreography */
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #0c100e;
+      color: #f1f5f9;
+      overflow-x: hidden;
+    }
+
+    [data-cloud-reveal] {
+      opacity: 0;
+      filter: blur(6px);
+      transform: translate3d(0, 28px, 0) scale(0.985);
+      transition:
+        opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: var(--stagger-delay, 0ms);
+    }
+
+    [data-cloud-reveal].is-revealed {
+      opacity: 1;
+      filter: blur(0px);
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+
+    .astro-glass-card {
+      position: relative;
+      background: rgba(12, 16, 14, 0.58);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.22), 0 24px 54px rgba(0, 0, 0, 0.36);
+      transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms ease, background-color 200ms ease;
+      will-change: transform;
+    }
+
+    .astro-glass-card:hover {
+      background: rgba(12, 16, 14, 0.68);
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .astro-glass-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      opacity: var(--spot-opacity, 0);
+      transition: opacity 220ms ease;
+      background: radial-gradient(
+        420px circle at var(--spot-x, 50%) var(--spot-y, 50%),
+        rgba(167, 243, 208, 0.16),
+        rgba(125, 211, 252, 0.08) 40%,
+        transparent 75%
+      );
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto !important;
+      }
+      [data-cloud-reveal] {
+        opacity: 1 !important;
+        filter: none !important;
+        transform: none !important;
+        transition: none !important;
+      }
+      .astro-glass-card,
+      [data-speed] {
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-[#0c100e] text-slate-100 antialiased selection:bg-emerald-400/30 selection:text-white relative overflow-x-clip">
+
+  <!-- Hair-Thin Glowing Top Viewport Scroll Progress Beam -->
+  <div aria-hidden="true" class="pointer-events-none fixed top-0 left-0 right-0 z-50 h-[2px] bg-white/[0.06]">
+    <div id="top-scroll-bar" style="width: 0%" class="h-full bg-gradient-to-r from-emerald-400 via-sky-300 to-amber-300 shadow-[0_0_12px_rgba(52,211,153,0.85)] transition-[width] duration-75 ease-out"></div>
+  </div>
+
+  <!-- Persistent Full-Screen WebGL Viewport (3D Volumetric Clouds + 105k Instanced Grass) -->
+  <div aria-hidden="true" class="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+    <div id="three-meadow-container" class="absolute inset-0 w-full h-full"></div>
+  </div>
+
+  <!-- Floating Frosted Glass Pill Navigation Bar + Scroll Altitude Gauge -->
+  <header class="sticky top-0 z-30 pt-4 px-4 sm:px-6 pointer-events-none">
+    <nav aria-label="Primary Navigation" class="pointer-events-auto relative overflow-hidden mx-auto max-w-5xl flex items-center justify-between gap-2 sm:gap-3 rounded-full bg-[rgba(12,16,14,0.64)] backdrop-blur-[14px] border border-white/[0.14] px-4 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.22),0_16px_40px_rgba(0,0,0,0.35)]">
+      <!-- Scroll Altitude Progress Beam along bottom rim -->
+      <div aria-hidden="true" id="nav-scroll-bar" style="width: 0%" class="pointer-events-none absolute bottom-0 left-0 h-[2.5px] bg-gradient-to-r from-emerald-400 via-sky-300 to-amber-300 transition-all duration-150"></div>
+
+      <!-- Identity -->
+      <a href="#top" id="brand-top-btn" class="flex items-center gap-2.5 text-sm font-semibold tracking-tight text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-full px-1.5 py-0.5">
+        <span class="size-7 rounded-full bg-white/10 border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] flex items-center justify-center text-emerald-300 font-mono text-xs font-bold">
+          DA
+        </span>
+        <span class="hidden sm:inline">David Azizyan</span>
+      </a>
+
+      <!-- Navigation Links -->
+      <div class="flex items-center gap-1 sm:gap-1.5" id="nav-links">
+        <button type="button" data-nav="lab" class="nav-pill-btn px-3 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 bg-white/15 text-white border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]">Live Lab</button>
+        <button type="button" data-nav="work" class="nav-pill-btn px-3 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 text-slate-300 hover:text-white hover:bg-white/10 border border-transparent">Work</button>
+        <button type="button" data-nav="stack" class="nav-pill-btn px-3 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 text-slate-300 hover:text-white hover:bg-white/10 border border-transparent">Stack</button>
+        <button type="button" data-nav="contact" class="nav-pill-btn px-3 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 text-slate-300 hover:text-white hover:bg-white/10 border border-transparent">Direct</button>
+      </div>
+
+      <!-- TUMO Portfolio Link -->
+      <a href="https://portfolio.am.tumo.world/" target="_blank" rel="noreferrer" class="flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-3.5 py-1.5 text-xs font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+        <span>TUMO World</span>
+        <i data-lucide="arrow-up-right" class="size-3.5 text-emerald-300"></i>
+      </a>
+    </nav>
+  </header>
+
+  <!-- Main Content Container (pointer-events-none wrapper lets cursor interact with 3D grass/clouds in gaps) -->
+  <main id="top" class="pointer-events-none relative z-10 mx-auto max-w-5xl px-4 sm:px-6 pt-8 sm:pt-12 pb-28 space-y-24">
+
+    <!-- 1. HERO BIO GLASSCARD -->
+    <section id="hero-section" aria-labelledby="hero-heading" class="transition-transform duration-75 ease-out">
+      <div class="astro-glass-card interactive-tilt-card pointer-events-auto overflow-hidden rounded-3xl p-7 sm:p-11 lg:p-12 space-y-8">
+        <!-- Top-Edge Light Highlight -->
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/45 to-transparent"></div>
+
+        <!-- Top Status Ribbon -->
+        <div class="relative flex items-center justify-start">
+          <div class="inline-flex flex-wrap items-center gap-2.5 rounded-full bg-white/[0.08] border border-white/[0.14] px-4 py-1.5 text-xs font-semibold text-slate-100">
+            <i data-lucide="sun" class="size-4 text-amber-300"></i>
+            <span>David Azizyan — Next.js, Astro, React, Python &amp; Cybersecurity</span>
+            <span class="text-slate-400">•</span>
+            <span class="text-emerald-300">Yerevan, AM</span>
+          </div>
+        </div>
+
+        <!-- Authentic Personal Bio & CTAs -->
+        <div class="relative max-w-3xl space-y-5">
+          <h1 id="hero-heading" class="text-4xl sm:text-5xl lg:text-[3.5rem] font-semibold text-white leading-[1.06] text-balance tracking-tight">
+            Hi, I’m David Azizyan.
+          </h1>
+          <p class="text-base sm:text-lg text-slate-200 leading-relaxed text-pretty max-w-2xl">
+            I’m a developer, cybersecurity enthusiast, and math lover based in Yerevan, building
+            interactive projects at TUMO. I love combining Next.js, Astro, React.js, Canvas.js,
+            and Anime.js with Python and Bash scripting—turning linear algebra, number theory,
+            and security engineering into living software.
+          </p>
+
+          <!-- Primary & Secondary CTAs -->
+          <div class="flex flex-wrap items-center gap-3.5 pt-1">
+            <a href="https://portfolio.am.tumo.world/" target="_blank" rel="noreferrer" class="inline-flex items-center gap-2 rounded-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-semibold text-sm px-6 py-3.5 shadow-[0_10px_28px_rgba(52,211,153,0.28)] active:scale-[0.99] transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
+              <span>Explore TUMO Portfolio</span>
+              <i data-lucide="arrow-up-right" class="size-4 text-slate-950"></i>
+            </a>
+
+            <button type="button" id="hero-copy-email" class="inline-flex items-center gap-2.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white font-medium text-sm px-6 py-3.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300">
+              <i data-lucide="copy" class="size-4 text-sky-300"></i>
+              <span id="hero-email-label">davitazizyan50@gmail.com</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Bento Telemetry Strip -->
+        <div class="pointer-events-none relative grid grid-cols-2 lg:grid-cols-4 gap-3.5 pt-2">
+          <div class="pointer-events-auto rounded-2xl bg-white/[0.06] border border-white/[0.12] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+            <div class="flex items-baseline justify-center gap-1 font-mono tabular-nums">
+              <span class="text-xl sm:text-2xl font-semibold text-white">JS · Py · Sh</span>
+            </div>
+            <p class="mt-0.5 text-center text-xs text-slate-300">Core Languages</p>
+          </div>
+          <div class="pointer-events-auto rounded-2xl bg-white/[0.06] border border-white/[0.12] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+            <div class="flex items-baseline justify-center gap-1 font-mono tabular-nums">
+              <span class="text-xl sm:text-2xl font-semibold text-white">Canvas</span>
+              <span class="text-xs sm:text-sm text-emerald-300 font-semibold">+ Anime.js</span>
+            </div>
+            <p class="mt-0.5 text-center text-xs text-slate-300">Graphics &amp; Motion</p>
+          </div>
+          <div class="pointer-events-auto rounded-2xl bg-white/[0.06] border border-white/[0.12] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+            <div class="flex items-baseline justify-center gap-1 font-mono tabular-nums">
+              <span class="text-xl sm:text-2xl font-semibold text-white">Sec &amp; Math</span>
+            </div>
+            <p class="mt-0.5 text-center text-xs text-slate-300">Focus Domains</p>
+          </div>
+          <div class="pointer-events-auto rounded-2xl bg-white/[0.06] border border-white/[0.12] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.16)]">
+            <div class="flex items-baseline justify-center gap-1 font-mono tabular-nums">
+              <span class="text-xl sm:text-2xl font-semibold text-white">TUMO</span>
+              <span class="text-xs sm:text-sm text-emerald-300 font-semibold">World</span>
+            </div>
+            <p class="mt-0.5 text-center text-xs text-slate-300">Showcase Hub</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. INTERACTIVE GLASS SANDBOXES (CANVAS.JS MATH + CYBERSECURITY TERMINAL) -->
+    <section id="lab" data-cloud-reveal aria-labelledby="lab-heading" class="space-y-6 scroll-mt-24">
+      <div class="pointer-events-auto inline-block rounded-2xl bg-[rgba(12,16,14,0.58)] backdrop-blur-[14px] border border-white/[0.12] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] space-y-1.5">
+        <div class="inline-flex items-center gap-2 text-xs font-mono font-semibold text-emerald-300">
+          <i data-lucide="sparkles" class="size-3.5"></i>
+          <span>Interactive Engineering Sandbox</span>
+        </div>
+        <h2 id="lab-heading" class="text-2xl sm:text-3xl font-semibold text-white text-balance">
+          Live Canvas.js Math &amp; Security Script Lab
+        </h2>
+        <p class="text-xs sm:text-sm text-slate-300 max-w-xl text-pretty">
+          Test real-time Fourier harmonic synthesis rendered on HTML5 Canvas.js and inspect
+          Python &amp; Bash security algorithms directly in the browser.
+        </p>
+      </div>
+
+      <div class="pointer-events-none grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Left GlassCard: Canvas.js Fourier Epicycle & Wave Synthesizer -->
+        <div data-speed="-0.35" class="astro-glass-card interactive-tilt-card pointer-events-auto overflow-hidden lg:col-span-6 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-5">
+          <div aria-hidden="true" class="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <span class="size-8 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-emerald-300">
+                <i data-lucide="activity" class="size-4"></i>
+              </span>
+              <div>
+                <h3 class="text-sm sm:text-base font-semibold text-white">Fourier Epicycle Visualizer</h3>
+                <p class="text-xs text-slate-300">HTML5 Canvas.js • Trigonometric Series</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button type="button" id="fourier-toggle-btn" class="inline-flex items-center gap-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-3 py-1.5 text-xs font-semibold text-white transition-colors">
+                <i data-lucide="pause" class="size-3.5 text-emerald-300"></i>
+                <span id="fourier-toggle-label">Pause</span>
+              </button>
+              <button type="button" id="fourier-reset-btn" aria-label="Reset harmonic parameters" class="size-8 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 flex items-center justify-center text-slate-200 hover:text-white transition-colors">
+                <i data-lucide="rotate-ccw" class="size-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Bright Translucent Canvas Viewport -->
+          <div class="relative w-full h-56 sm:h-64 rounded-2xl bg-white/90 border border-white/25 overflow-hidden">
+            <canvas id="fourier-canvas" class="block w-full h-full" aria-label="Interactive Fourier series epicycle and wave canvas"></canvas>
+            <div class="pointer-events-none absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-mono text-slate-900">
+              <span id="fourier-n-badge" class="rounded-full bg-slate-900/90 text-white px-2.5 py-0.5 tabular-nums">N = 5 harmonics</span>
+              <span id="fourier-w-badge" class="rounded-full bg-slate-900/90 text-emerald-300 px-2.5 py-0.5 tabular-nums">ω = 1.2x</span>
+            </div>
+          </div>
+
+          <!-- Interactive Controls -->
+          <div class="space-y-3.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-200">
+                <i data-lucide="sliders" class="size-3.5 text-emerald-300"></i>
+                <span>Series Preset</span>
+              </span>
+              <div id="wave-preset-group" class="inline-flex items-center gap-1 rounded-full bg-white/[0.08] border border-white/[0.12] p-1">
+                <button type="button" data-wave="square" class="wave-preset-btn px-3 py-1 rounded-full text-xs font-semibold transition-colors bg-emerald-400 text-slate-950">Square Wave</button>
+                <button type="button" data-wave="sawtooth" class="wave-preset-btn px-3 py-1 rounded-full text-xs font-medium transition-colors text-slate-300 hover:text-white">Sawtooth</button>
+                <button type="button" data-wave="rose" class="wave-preset-btn px-3 py-1 rounded-full text-xs font-medium transition-colors text-slate-300 hover:text-white">Polar Harmonic</button>
+              </div>
+            </div>
+
+            <!-- Sliders -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="rounded-2xl bg-white/[0.06] border border-white/[0.12] px-3.5 py-2.5 space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-medium text-slate-200">Epicycle Circles</span>
+                  <span id="harmonics-val" class="font-mono font-semibold text-emerald-300 tabular-nums">5</span>
+                </div>
+                <input id="harmonics-slider" type="range" min="1" max="14" value="5" class="w-full accent-emerald-400 cursor-pointer" />
+              </label>
+
+              <label class="rounded-2xl bg-white/[0.06] border border-white/[0.12] px-3.5 py-2.5 space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="font-medium text-slate-200">Angular Velocity</span>
+                  <span id="speed-val" class="font-mono font-semibold text-emerald-300 tabular-nums">1.2x</span>
+                </div>
+                <input id="speed-slider" type="range" min="0.2" max="3.0" step="0.2" value="1.2" class="w-full accent-emerald-400 cursor-pointer" />
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right GlassCard: Python, Bash & Crypto Script Console -->
+        <div data-speed="0.35" class="astro-glass-card interactive-tilt-card pointer-events-auto overflow-hidden lg:col-span-6 rounded-3xl p-6 sm:p-7 flex flex-col justify-between space-y-4">
+          <div aria-hidden="true" class="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+
+          <div class="space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <span class="size-8 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center text-emerald-300">
+                  <i data-lucide="lock" class="size-4"></i>
+                </span>
+                <div>
+                  <h3 class="text-sm sm:text-base font-semibold text-white">Security &amp; Math Script Console</h3>
+                  <p id="snippet-badge" class="text-xs text-slate-300">Cybersecurity • Python</p>
+                </div>
+              </div>
+
+              <button type="button" id="execute-probe-btn" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 px-3.5 py-1.5 text-xs font-semibold transition-colors">
+                <i data-lucide="play" class="size-3 text-slate-950"></i>
+                <span id="execute-probe-label">Execute Probe #1</span>
+              </button>
+            </div>
+
+            <!-- Script Selector Pills -->
+            <div id="snippet-tabs" class="flex flex-wrap gap-1.5">
+              <button type="button" data-snippet="entropy" class="snippet-tab-btn px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all bg-white/18 text-white border border-white/25">Python Entropy</button>
+              <button type="button" data-snippet="bash" class="snippet-tab-btn px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all bg-white/[0.06] text-slate-300 hover:bg-white/12 border border-white/10">Bash Hardening</button>
+              <button type="button" data-snippet="rsa" class="snippet-tab-btn px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all bg-white/[0.06] text-slate-300 hover:bg-white/12 border border-white/10">Modular Math</button>
+            </div>
+          </div>
+
+          <!-- Command Bar -->
+          <div class="flex items-center justify-between gap-2 rounded-full bg-black/40 border border-white/12 px-3.5 py-2 text-xs font-mono text-slate-200">
+            <span class="truncate">
+              <span class="text-emerald-300 font-bold">$ </span>
+              <span id="snippet-command">python3 sentinel_audit.py --scan /var/log/auth.log --threshold 3.85</span>
+            </span>
+            <button type="button" id="copy-cmd-btn" aria-label="Copy CLI command" class="shrink-0 inline-flex items-center gap-1 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-2.5 py-0.5 text-[11px] font-sans font-semibold text-white transition-colors">
+              <i data-lucide="copy" class="size-3 text-emerald-300"></i>
+              <span id="copy-cmd-label">Copy</span>
+            </button>
+          </div>
+
+          <!-- Frosted Source Code Block -->
+          <pre class="rounded-2xl bg-black/45 text-emerald-50 border border-white/12 p-4 text-xs font-mono leading-relaxed overflow-x-auto"><code id="snippet-code"></code></pre>
+
+          <!-- Verified Execution Output Pill -->
+          <div class="rounded-2xl bg-white/[0.06] border border-white/12 p-3.5 space-y-1">
+            <div class="flex items-center justify-between text-[11px] font-mono font-semibold text-emerald-300">
+              <span id="stdout-header">STDOUT • EXECUTION #1</span>
+              <span>EXIT 0</span>
+            </div>
+            <pre id="snippet-output" class="text-xs font-mono text-slate-200 whitespace-pre-wrap leading-relaxed"></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SELECTED WORK (BENTOGRID + INTERACTIVE GLASSCARDS) -->
+    <section id="work" data-cloud-reveal aria-labelledby="work-heading" class="space-y-8 scroll-mt-24">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+        <div class="pointer-events-auto rounded-2xl bg-[rgba(12,16,14,0.58)] backdrop-blur-[14px] border border-white/[0.12] px-5 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] space-y-1">
+          <p class="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-300">
+            Projects &amp; Experiments
+          </p>
+          <h2 id="work-heading" class="text-2xl sm:text-3xl font-semibold text-white text-balance">
+            Cybersecurity, Math Visuals &amp; Interactive JS
+          </h2>
+        </div>
+
+        <!-- Frosted Glass Category Filter Pill -->
+        <div role="tablist" aria-label="Filter projects by engineering domain" id="category-tabs" class="pointer-events-auto inline-flex flex-wrap items-center gap-1 rounded-full bg-[rgba(12,16,14,0.62)] backdrop-blur-[14px] border border-white/[0.12] p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)] self-start sm:self-auto">
+          <button role="tab" aria-selected="true" type="button" data-cat="All" class="cat-btn px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-colors duration-150 bg-emerald-400 text-slate-950">All</button>
+          <button role="tab" aria-selected="false" type="button" data-cat="Cybersecurity" class="cat-btn px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 text-slate-300 hover:text-white border border-transparent">Cybersecurity</button>
+          <button role="tab" aria-selected="false" type="button" data-cat="Math & Motion" class="cat-btn px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 text-slate-300 hover:text-white border border-transparent">Math &amp; Motion</button>
+          <button role="tab" aria-selected="false" type="button" data-cat="Web & UI" class="cat-btn px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 text-slate-300 hover:text-white border border-transparent">Web &amp; UI</button>
+        </div>
+      </div>
+
+      <!-- BentoGrid: pointer-events-none on grid wrapper, pointer-events-auto on GlassCards -->
+      <div id="projects-grid" class="pointer-events-none grid grid-cols-1 md:grid-cols-2 gap-7"></div>
+    </section>
+
+    <!-- 4. TECHNICAL TOOLKIT GLASSCARD -->
+    <section id="stack" data-cloud-reveal aria-labelledby="stack-heading" class="pointer-events-none grid grid-cols-1 gap-7 scroll-mt-24">
+      <div class="astro-glass-card interactive-tilt-card pointer-events-auto overflow-hidden rounded-3xl p-7 sm:p-8 space-y-6">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+
+        <div class="relative space-y-2">
+          <p class="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-300">
+            Technical Toolkit
+          </p>
+          <h2 id="stack-heading" class="text-2xl font-semibold text-white text-balance">
+            Next.js, Astro, Tailwind CSS, React &amp; Security
+          </h2>
+          <p class="text-sm text-slate-300 leading-relaxed">
+            From Next.js, Astro, React.js, Tailwind CSS, and motion libraries to Python, Bash
+            scripting, cybersecurity, and mathematics.
+          </p>
+        </div>
+
+        <div id="stack-groups-container" class="relative space-y-5"></div>
+      </div>
+    </section>
+
+    <!-- 5. DIRECT GLASSCARD CONTACT -->
+    <section id="contact" data-cloud-reveal aria-labelledby="contact-heading" class="scroll-mt-24">
+      <div class="astro-glass-card interactive-tilt-card pointer-events-auto overflow-hidden rounded-3xl p-7 sm:p-10">
+        <div aria-hidden="true" class="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+
+        <div class="relative flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+          <div class="space-y-3 max-w-xl">
+            <p class="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-300">
+              Direct Channels
+            </p>
+            <h2 id="contact-heading" class="text-2xl sm:text-3xl font-semibold text-white text-balance">
+              Connect with David Azizyan or explore my TUMO portfolio.
+            </h2>
+            <p class="text-sm text-slate-300 leading-relaxed text-pretty">
+              Copy my Gmail directly or open my TUMO World portfolio to view interactive JavaScript,
+              Python, cybersecurity, and math projects.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-3.5 shrink-0">
+            <button type="button" id="contact-copy-email" aria-label="Copy email address" class="inline-flex items-center justify-between sm:justify-center gap-3 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-5 py-3 text-sm font-mono font-medium text-white transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+              <span>davitazizyan50@gmail.com</span>
+              <span class="inline-flex items-center gap-1 rounded-full bg-emerald-400 text-slate-950 px-2.5 py-0.5 text-xs font-sans font-semibold">
+                <i data-lucide="copy" class="size-3.5"></i>
+                <span id="contact-copy-badge">Copy</span>
+              </span>
+            </button>
+
+            <div class="flex flex-wrap items-center gap-2 mt-3">
+              <a href="https://portfolio.am.tumo.world/" target="_blank" rel="noreferrer" aria-label="David Azizyan TUMO Portfolio" class="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-4 py-2 text-xs font-semibold text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+                <i data-lucide="globe" class="size-3.5 text-emerald-300"></i>
+                <span>TUMO World Portfolio</span>
+              </a>
+              <a href="mailto:davitazizyan50@gmail.com" aria-label="Send email to David Azizyan" class="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 px-4 py-2 text-xs font-semibold text-white transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+                <i data-lucide="external-link" class="size-3.5 text-emerald-300"></i>
+                <span>Open Mail App</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-white/10 bg-[rgba(12,16,14,0.72)] backdrop-blur-[14px]">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-300">
+      <div class="flex items-center gap-2">
+        <span class="font-mono font-semibold text-white">David Azizyan</span>
+      </div>
+      <a href="https://portfolio.am.tumo.world/" target="_blank" rel="noreferrer" class="font-mono tabular-nums text-emerald-300 hover:text-white transition-colors">
+        portfolio.am.tumo.world
+      </a>
+    </div>
+  </footer>
+
+  <!-- FROSTED DARK GLASS CASE STUDY MODAL DIALOG -->
+  <div id="project-modal" role="dialog" aria-modal="true" aria-labelledby="modal-project-title" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-md">
+    <div id="project-modal-card" tabindex="-1" class="relative w-full max-w-2xl max-h-[88dvh] overflow-y-auto rounded-3xl bg-[rgba(12,16,14,0.88)] backdrop-blur-2xl border border-white/15 p-6 sm:p-8 shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_28px_80px_rgba(0,0,0,0.6)] space-y-6 focus:outline-none">
+      <!-- Header -->
+      <div class="flex items-start justify-between gap-4 border-b border-white/10 pb-5">
+        <div class="space-y-1.5">
+          <div id="modal-meta" class="flex flex-wrap items-center gap-2 text-xs font-mono font-semibold text-emerald-300"></div>
+          <h3 id="modal-project-title" class="text-2xl font-semibold text-white text-balance"></h3>
+          <p id="modal-metric-detail" class="text-sm text-slate-300"></p>
+        </div>
+
+        <button type="button" id="modal-close-btn" aria-label="Close case study dialog" class="size-9 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 flex items-center justify-center text-white shrink-0 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400">
+          <i data-lucide="x" class="size-4"></i>
+        </button>
+      </div>
+
+      <!-- Problem & Architecture Breakdown -->
+      <div class="space-y-4">
+        <div class="rounded-2xl bg-white/[0.05] border border-white/10 p-5 space-y-1.5">
+          <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-slate-400">01 / Bottleneck &amp; Problem Space</h4>
+          <p id="modal-problem" class="text-sm text-slate-200 leading-relaxed"></p>
+        </div>
+
+        <div class="rounded-2xl bg-white/[0.05] border border-white/10 p-5 space-y-1.5">
+          <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-300">02 / Architecture Decision</h4>
+          <p id="modal-architecture" class="text-sm text-slate-200 leading-relaxed"></p>
+        </div>
+
+        <div class="rounded-2xl bg-emerald-400/10 border border-emerald-300/20 p-5 space-y-2.5">
+          <h4 class="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-300">03 / Verified Production Impact</h4>
+          <ul id="modal-impact-list" class="space-y-2"></ul>
+        </div>
+      </div>
+
+      <!-- Stack Tags & Footer Actions -->
+      <div class="pt-2 flex flex-wrap items-center justify-between gap-4 border-t border-white/10">
+        <div id="modal-tags" class="flex flex-wrap gap-1.5"></div>
+        <div class="flex items-center gap-2.5">
+          <a id="modal-live-link" href="https://portfolio.am.tumo.world/" target="_blank" rel="noreferrer" class="inline-flex items-center gap-1.5 rounded-full bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-semibold px-4 py-2 text-xs transition-all">
+            <span>View on TUMO Portfolio</span>
+            <i data-lucide="arrow-up-right" class="size-3.5"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic: Data, Three.js Volumetric Clouds & 105k Grass, Canvas.js Fourier Lab, Inertia Scroll & Card Tilt -->
+  <script>
+    (() => {
+      const EMAIL_ADDRESS = 'davitazizyan50@gmail.com';
+      const TUMO_URL = 'https://portfolio.am.tumo.world/';
+
+      const PROJECTS = [
+        {
+          id: 'cipher-audit-cli',
+          title: 'Sentinel Bash & Python Auditor',
+          tagline: 'Automated Linux hardening, network reconnaissance, and log anomaly scanner.',
+          category: 'Cybersecurity',
+          year: '2026',
+          role: 'Security & Scripting Developer',
+          metric: '140+ Audit Checks',
+          metricDetail: 'Zero-dependency Python & Bash security scanner for Debian/Ubuntu hosts',
+          tags: ['Python', 'Bash Script', 'Cybersecurity', 'Linux'],
+          summary:
+            'Modular CLI security pipeline combining fast Bash system probes with Python packet and auth-log entropy analysis to detect brute-force patterns and misconfigured permissions.',
+          caseStudy: {
+            problem:
+              'Manual server configuration audits across Linux environments were slow and missed subtle privilege-escalation vectors such as SUID binaries, weak SSH ciphers, and anomalous port bindings.',
+            architecture:
+              'Engineered a two-stage pipeline: a POSIX-compliant Bash collector gathers kernel, firewall, and filesystem state in milliseconds, piping structured JSON into a Python analyzer that scores risk vectors and flags suspicious auth-log entropy.',
+            impact: [
+              'Automated 140+ CIS-aligned Linux permission, firewall, and SSH configuration checks.',
+              'Reduced full host security triage from 35 minutes of manual commands to 1.8 seconds.',
+              'Detected anomalous SSH brute-force bursts using Shannon entropy scoring on auth logs.'
+            ],
+            liveUrl: TUMO_URL
+          }
+        },
+        {
+          id: 'euler-canvas-lab',
+          title: 'Harmonic Math & Canvas Lab',
+          tagline: 'Interactive Fourier epicycles, vector fields, and fractal geometry visualizer.',
+          category: 'Math & Motion',
+          year: '2026',
+          role: 'Creative Math & JS Engineer',
+          metric: '60 FPS @ 10k Nodes',
+          metricDetail: 'Hardware-accelerated HTML5 Canvas.js & Anime.js mathematical simulation',
+          tags: ['Canvas.js', 'Anime.js', 'JavaScript', 'Mathematics'],
+          summary:
+            'Real-time mathematical sandbox rendering complex Fourier series, parametric polar curves, and matrix transformations with silky Anime.js UI choreography.',
+          caseStudy: {
+            problem:
+              'Abstract linear algebra, trigonometry, and differential equations are difficult to build intuition for through static textbook diagrams alone.',
+            architecture:
+              'Built a custom 2D rendering engine on HTML5 Canvas.js using typed Float64Arrays for fast complex-number arithmetic, paired with React.js controls and Anime.js spring transitions for parameter scrubbing.',
+            impact: [
+              'Rendered 10,000+ simultaneous harmonic vectors at a locked 60fps in the browser.',
+              'Implemented interactive discrete Fourier transforms (DFT) that trace arbitrary user-drawn paths.',
+              'Designed step-by-step visual proofs for eigenvalues, modular arithmetic, and Bézier splines.'
+            ],
+            liveUrl: TUMO_URL
+          }
+        },
+        {
+          id: 'react-tumo-showcase',
+          title: 'Interactive TUMO Web Engine',
+          tagline: 'Modular React.js & Anime.js creative coding showcase and project hub.',
+          category: 'Web & UI',
+          year: '2025',
+          role: 'Frontend & JavaScript Developer',
+          metric: '100/100 Performance',
+          metricDetail: 'Zero-layout-shift React.js architecture with physics-based Anime.js motion',
+          tags: ['React.js', 'JavaScript', 'Anime.js', 'Tailwind CSS'],
+          summary:
+            'Component-driven web portfolio and interactive lab built at TUMO, combining clean React state architecture with timeline-sequenced Anime.js micro-interactions.',
+          caseStudy: {
+            problem:
+              'Creative coding portfolios often suffer from heavy animation libraries that block the main thread and degrade responsiveness on mobile devices.',
+            architecture:
+              'Structured isolated React.js view islands backed by GPU-composited Anime.js timelines (translate3d, scale, opacity) and responsive Canvas particle layers that automatically pause off-screen.',
+            impact: [
+              'Achieved sub-50ms interaction responsiveness across desktop and mobile viewports.',
+              'Unified interactive math sketches, Python automation demos, and web apps in one hub.',
+              'Published and showcased via the official TUMO World student portfolio ecosystem.'
+            ],
+            liveUrl: TUMO_URL
+          }
+        },
+        {
+          id: 'crypto-prime-toolkit',
+          title: 'Number Theory & Crypto Toolkit',
+          tagline: 'Python & JS implementation of RSA, Diffie-Hellman, and modular arithmetic.',
+          category: 'Cybersecurity',
+          year: '2025',
+          role: 'Developer & Math Enthusiast',
+          metric: '2048-bit Keygen',
+          metricDetail: 'Miller-Rabin primality testing & Euclidean modular inverse engine in Python',
+          tags: ['Python', 'Mathematics', 'Cybersecurity', 'JavaScript'],
+          summary:
+            'Educational cryptography suite implementing prime sieves, modular exponentiation, and symmetric/asymmetric cipher visualizations from mathematical first principles.',
+          caseStudy: {
+            problem:
+              'Developers frequently treat cryptographic primitives as black boxes without understanding the underlying modular arithmetic and prime factorization guarantees.',
+            architecture:
+              'Wrote clean, audited implementations of Miller-Rabin probabilistic primality tests, Extended Euclidean algorithms, and SHA-256 bit-shift visualizers in Python with an interactive JavaScript step debugger.',
+            impact: [
+              'Generated 2048-bit probable primes in under 120ms using optimized square-and-multiply exponentiation.',
+              'Visualized avalanche effects and modular clock arithmetic for cryptographic key exchanges.',
+              'Zero external crypto dependencies—built purely from mathematical definitions.'
+            ],
+            liveUrl: TUMO_URL
+          }
+        }
+      ];
+
+      const STACK_GROUPS = [
+        {
+          category: 'Frameworks, UI & Motion Libraries',
+          icon: 'layers',
+          items: [
+            { name: 'Next.js & Astro', detail: 'App Router, SSR/SSG islands, edge routing & fast static builds' },
+            { name: 'React.js & JavaScript', detail: 'ES2025+, Hooks, state architecture & typed arrays' },
+            { name: 'Tailwind CSS & Motion', detail: 'Glassmorphic tokens, Framer Motion, Anime.js & Radix UI' },
+            { name: 'Canvas.js & Three.js', detail: '2D/3D hardware-accelerated math plots & particle physics' }
+          ]
+        },
+        {
+          category: 'Systems, Scripting & Security',
+          icon: 'terminal',
+          items: [
+            { name: 'Python', detail: 'Automation, security tooling, cryptography & data scripts' },
+            { name: 'Bash Scripting', detail: 'Linux CLI pipelines, system hardening, process control' },
+            { name: 'Cybersecurity', detail: 'Network hygiene, log analysis, vulnerability auditing' },
+            { name: 'Git & Linux Environment', detail: 'Shell workflows, SSH, permission & audit hygiene' }
+          ]
+        },
+        {
+          category: 'Applied Mathematics',
+          icon: 'cpu',
+          items: [
+            { name: 'Linear Algebra & Vectors', detail: '2D/3D transforms, matrices, Canvas kinematics' },
+            { name: 'Number Theory & Crypto', detail: 'Modular arithmetic, primes, hashing & key exchange' },
+            { name: 'Trigonometry & Calculus', detail: 'Wave harmonics, Fourier series, easing curves' },
+            { name: 'Discrete Math & Logic', detail: 'Graph traversal, combinatorics, algorithm analysis' }
+          ]
+        }
+      ];
+
+      const SECURITY_SNIPPETS = {
+        entropy: {
+          badge: 'Cybersecurity • Python',
+          command: 'python3 sentinel_audit.py --scan /var/log/auth.log --threshold 3.85',
+          code: `import math, collections
+
+def shannon_entropy(payload: str) -> float:
+    freq = collections.Counter(payload)
+    length = len(payload)
+    return -sum((c / length) * math.log2(c / length) for c in freq.values())
+
+# Flag high-entropy token injections & anomalous SSH bursts
+sample = "ssh2-rsa-AAAAB3NzaC1yc2EAAAADAQABAAABAQC9x8k2..."
+score = shannon_entropy(sample)
+print(f"[AUDIT] Entropy={score:.3f} bits | Risk={'HIGH' if score > 4.2 else 'NOMINAL'}")`,
+          output: `[OK] Parsed 1,420 auth events in 14ms
+[AUDIT] Entropy=4.618 bits | Risk=HIGH (Obfuscated payload flagged)
+[DEFENSE] Auto-generated ufw rate-limit rule on port 22`
+        },
+        bash: {
+          badge: 'Linux Hardening • Bash',
+          command: 'bash ./hardening_probe.sh --strict --json',
+          code: `#!/usr/bin/env bash
+set -euo pipefail
+
+# Audit world-writable paths & unexpected SUID binaries
+suid_count=$(find /usr/bin -perm -4000 -type f 2>/dev/null | wc -l)
+open_ports=$(ss -tuln | awk 'NR>1 {print $5}' | sort -u | wc -l)
+
+printf '{"suid_binaries": %d, "listening_sockets": %d, "status": "VERIFIED"}\\n' \\
+  "$suid_count" "$open_ports"`,
+          output: `{"suid_binaries": 11, "listening_sockets": 4, "status": "VERIFIED"}
+[PASS] Zero unauthorized SUID escalations detected
+[PASS] Kernel ASLR & SYN cookies active`
+        },
+        rsa: {
+          badge: 'Number Theory • Crypto',
+          command: 'python3 modular_crypto.py --bits 2048 --verify',
+          code: `def mod_pow(base: int, exp: int, mod: int) -> int:
+    result = 1
+    base %= mod
+    while exp > 0:
+        if exp & 1:
+            result = (result * base) % mod
+        exp >>= 1
+        base = (base * base) % mod
+    return result
+
+# Diffie-Hellman shared secret verification (g^ab mod p)
+p, g = 2147483647, 7
+alice_pub = mod_pow(g, 194831, p)
+shared = mod_pow(alice_pub, 882341, p)
+print(f"Shared Secret Modulo {p}: {shared}")`,
+          output: `Shared Secret Modulo 2147483647: 1492084311
+[MATH] O(log n) binary exponentiation completed in 0.04ms
+[VERIFY] Alice & Bob modular congruence confirmed`
+        }
+      };
+
+      // Shared inertia scroll state ("site rolling")
+      const scrollState = {
+        targetProgress: 0,
+        smoothProgress: 0,
+        velocity: 0,
+        lastY: window.scrollY
+      };
+
+      // -----------------------------------------------------------------------
+      // 1. RENDER PROJECTS, STACK & MODAL
+      // -----------------------------------------------------------------------
+      let activeCategory = 'All';
+      const projectsGrid = document.getElementById('projects-grid');
+
+      function renderProjects() {
+        const filtered =
+          activeCategory === 'All'
+            ? PROJECTS
+            : PROJECTS.filter((p) => p.category === activeCategory);
+
+        projectsGrid.innerHTML = filtered
+          .map(
+            (project, idx) => `
+          <article
+            data-project-id="${project.id}"
+            data-cloud-reveal
+            data-speed="${idx % 2 === 0 ? '-0.28' : '0.28'}"
+            style="--stagger-delay: ${idx * 90}ms"
+            class="astro-glass-card interactive-tilt-card is-revealed pointer-events-auto group overflow-hidden flex flex-col justify-between rounded-3xl p-7 sm:p-8 cursor-pointer"
+          >
+            <div aria-hidden="true" class="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent"></div>
+            <div class="relative space-y-4">
+              <div class="flex items-center justify-between gap-3">
+                <span class="inline-flex items-center rounded-full bg-white/[0.08] border border-white/[0.14] px-3.5 py-1 text-xs font-semibold text-slate-200">
+                  ${project.category}
+                </span>
+                <span class="inline-flex items-center rounded-full bg-emerald-400/15 border border-emerald-300/25 px-3.5 py-1 text-xs font-mono font-semibold text-emerald-300 tabular-nums">
+                  ${project.metric}
+                </span>
+              </div>
+              <div class="space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                  <h3 class="text-xl font-semibold text-white group-hover:text-emerald-300 transition-colors">
+                    ${project.title}
+                  </h3>
+                  <span class="size-9 rounded-full bg-white/10 border border-white/15 flex items-center justify-center text-white group-hover:bg-emerald-400 group-hover:text-slate-950 group-hover:border-emerald-400 transition-colors shrink-0">
+                    <i data-lucide="arrow-up-right" class="size-4"></i>
+                  </span>
+                </div>
+                <p class="text-sm font-medium text-slate-200">${project.tagline}</p>
+                <p class="text-sm text-slate-300 leading-relaxed text-pretty">${project.summary}</p>
+              </div>
+            </div>
+            <div class="relative mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex flex-wrap gap-1.5">
+                ${project.tags
+                  .map(
+                    (tag) =>
+                      `<span class="rounded-full bg-white/[0.07] border border-white/[0.12] px-3 py-1 text-xs font-mono text-slate-200">${tag}</span>`
+                  )
+                  .join('')}
+              </div>
+              <span class="inline-flex items-center gap-1 rounded-full bg-white/10 group-hover:bg-white/15 border border-white/15 px-3.5 py-1.5 text-xs font-semibold text-white transition-colors">
+                <span>Architecture Notes</span>
+                <i data-lucide="chevron-right" class="size-3.5 text-emerald-300"></i>
+              </span>
+            </div>
+          </article>
+        `
+          )
+          .join('');
+
+        if (window.lucide) window.lucide.createIcons();
+        bindTiltCards();
+      }
+
+      function renderStack() {
+        const container = document.getElementById('stack-groups-container');
+        container.innerHTML = STACK_GROUPS.map(
+          (group) => `
+          <div class="space-y-2.5">
+            <div class="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-slate-200">
+              <i data-lucide="${group.icon}" class="size-3.5 text-emerald-300"></i>
+              <span>${group.category}</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              ${group.items
+                .map(
+                  (tech) => `
+                <div class="rounded-2xl bg-white/[0.06] hover:bg-white/[0.1] border border-white/[0.12] px-4 py-2.5 transition-colors">
+                  <div class="text-sm font-semibold text-white truncate">${tech.name}</div>
+                  <div class="text-xs text-slate-300 truncate">${tech.detail}</div>
+                </div>
+              `
+                )
+                .join('')}
+            </div>
+          </div>
+        `
+        ).join('');
+      }
+
+      // Case study modal
+      const modal = document.getElementById('project-modal');
+      const modalCard = document.getElementById('project-modal-card');
+      const modalCloseBtn = document.getElementById('modal-close-btn');
+
+      function openProjectModal(projectId) {
+        const project = PROJECTS.find((p) => p.id === projectId);
+        if (!project) return;
+        document.getElementById('modal-meta').innerHTML = `
+          <span>${project.category}</span>
+          <span class="text-slate-500">•</span>
+          <span>${project.role}</span>
+          <span class="text-slate-500">•</span>
+          <span>${project.year}</span>
+        `;
+        document.getElementById('modal-project-title').textContent = project.title;
+        document.getElementById('modal-metric-detail').textContent = project.metricDetail;
+        document.getElementById('modal-problem').textContent = project.caseStudy.problem;
+        document.getElementById('modal-architecture').textContent = project.caseStudy.architecture;
+        document.getElementById('modal-impact-list').innerHTML = project.caseStudy.impact
+          .map(
+            (pt) => `
+            <li class="flex items-start gap-2.5 text-sm text-slate-100 leading-relaxed">
+              <i data-lucide="check" class="size-4 text-emerald-300 shrink-0 mt-0.5"></i>
+              <span>${pt}</span>
+            </li>
+          `
+          )
+          .join('');
+        document.getElementById('modal-tags').innerHTML = project.tags
+          .map(
+            (tag) =>
+              `<span class="rounded-full bg-white/[0.08] border border-white/12 px-3 py-1 text-xs font-mono text-slate-200">${tag}</span>`
+          )
+          .join('');
+        document.getElementById('modal-live-link').href = project.caseStudy.liveUrl;
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        if (window.lucide) window.lucide.createIcons();
+        modalCard.focus();
+      }
+
+      function closeProjectModal() {
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+
+      projectsGrid.addEventListener('click', (e) => {
+        const card = e.target.closest('[data-project-id]');
+        if (card) openProjectModal(card.getAttribute('data-project-id'));
+      });
+      modalCloseBtn.addEventListener('click', closeProjectModal);
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) closeProjectModal();
+      });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+          closeProjectModal();
+        }
+      });
+
+      // Category filter buttons
+      document.querySelectorAll('.cat-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeCategory = btn.getAttribute('data-cat');
+          document.querySelectorAll('.cat-btn').forEach((b) => {
+            const isSel = b === btn;
+            b.setAttribute('aria-selected', String(isSel));
+            b.className = isSel
+              ? 'cat-btn px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-colors duration-150 bg-emerald-400 text-slate-950'
+              : 'cat-btn px-4 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 text-slate-300 hover:text-white border border-transparent';
+          });
+          renderProjects();
+        });
+      });
+
+      // -----------------------------------------------------------------------
+      // 2. CLIPBOARD & SECURITY SCRIPT CONSOLE
+      // -----------------------------------------------------------------------
+      function copyTextReliable(text, onDone) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard
+            .writeText(text)
+            .then(onDone)
+            .catch(() => fallbackCopy(text, onDone));
+        } else {
+          fallbackCopy(text, onDone);
+        }
+      }
+
+      function fallbackCopy(text, onDone) {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        onDone();
+      }
+
+      document.getElementById('hero-copy-email').addEventListener('click', () => {
+        copyTextReliable(EMAIL_ADDRESS, () => {
+          const lbl = document.getElementById('hero-email-label');
+          lbl.textContent = `Copied ${EMAIL_ADDRESS}`;
+          setTimeout(() => {
+            lbl.textContent = EMAIL_ADDRESS;
+          }, 2200);
+        });
+      });
+
+      document.getElementById('contact-copy-email').addEventListener('click', () => {
+        copyTextReliable(EMAIL_ADDRESS, () => {
+          const badge = document.getElementById('contact-copy-badge');
+          badge.textContent = 'Copied';
+          setTimeout(() => {
+            badge.textContent = 'Copy';
+          }, 2200);
+        });
+      });
+
+      let activeSnippet = 'entropy';
+      let probeRunCount = 1;
+
+      function syncSnippetUI() {
+        const item = SECURITY_SNIPPETS[activeSnippet];
+        document.getElementById('snippet-badge').textContent = item.badge;
+        document.getElementById('snippet-command').textContent = item.command;
+        document.getElementById('snippet-code').textContent = item.code;
+        document.getElementById('snippet-output').textContent = item.output;
+        document.getElementById('stdout-header').textContent = `STDOUT • EXECUTION #${probeRunCount}`;
+        document.getElementById('execute-probe-label').textContent = `Execute Probe #${probeRunCount}`;
+      }
+
+      document.querySelectorAll('.snippet-tab-btn').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          activeSnippet = btn.getAttribute('data-snippet');
+          document.querySelectorAll('.snippet-tab-btn').forEach((b) => {
+            const active = b === btn;
+            b.className = active
+              ? 'snippet-tab-btn px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all bg-white/18 text-white border border-white/25'
+              : 'snippet-tab-btn px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all bg-white/[0.06] text-slate-300 hover:bg-white/12 border border-white/10';
+          });
+          syncSnippetUI();
+        });
+      });
+
+      document.getElementById('execute-probe-btn').addEventListener('click', () => {
+        probeRunCount += 1;
+        syncSnippetUI();
+      });
+
+      document.getElementById('copy-cmd-btn').addEventListener('click', () => {
+        copyTextReliable(SECURITY_SNIPPETS[activeSnippet].command, () => {
+          const lbl = document.getElementById('copy-cmd-label');
+          lbl.textContent = 'Copied';
+          setTimeout(() => {
+            lbl.textContent = 'Copy';
+          }, 1800);
+        });
+      });
+
+      // -----------------------------------------------------------------------
+      // 3. INTERACTIVE HTML5 CANVAS.JS FOURIER EPICYCLE VISUALIZER
+      // -----------------------------------------------------------------------
+      function initFourierLab() {
+        const canvas = document.getElementById('fourier-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        let harmonics = 5;
+        let waveSpeed = 1.2;
+        let waveMode = 'square';
+        let isRunning = true;
+        let time = 0;
+        let waveTrail = [];
+        let isVisible = true;
+
+        function resizeCanvas() {
+          const parent = canvas.parentElement;
+          if (!parent) return;
+          const dpr = Math.min(window.devicePixelRatio || 1, 2);
+          const rect = parent.getBoundingClientRect();
+          canvas.width = rect.width * dpr;
+          canvas.height = rect.height * dpr;
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const obs = new IntersectionObserver(
+          (entries) => {
+            isVisible = entries[0]?.isIntersecting ?? true;
+          },
+          { threshold: 0.05 }
+        );
+        obs.observe(canvas);
+
+        function renderFourier() {
+          if (!document.hidden && isVisible) {
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            ctx.clearRect(0, 0, width, height);
+
+            // Coordinate grid
+            ctx.strokeStyle = 'rgba(14, 165, 233, 0.12)';
+            ctx.lineWidth = 1;
+            const gridStep = 28;
+            for (let gx = 0; gx < width; gx += gridStep) {
+              ctx.beginPath();
+              ctx.moveTo(gx, 0);
+              ctx.lineTo(gx, height);
+              ctx.stroke();
+            }
+            for (let gy = 0; gy < height; gy += gridStep) {
+              ctx.beginPath();
+              ctx.moveTo(0, gy);
+              ctx.lineTo(width, gy);
+              ctx.stroke();
+            }
+
+            const originX = width < 480 ? width * 0.28 : width * 0.24;
+            const originY = height * 0.5;
+            const baseRadius = Math.min(width, height) * 0.21;
+            let x = originX;
+            let y = originY;
+
+            for (let i = 0; i < harmonics; i++) {
+              const prevX = x;
+              const prevY = y;
+              let n = 1;
+              let radius = baseRadius;
+              let freqMultiplier = 1;
+
+              if (waveMode === 'square') {
+                n = i * 2 + 1;
+                radius = baseRadius * (4 / (n * Math.PI));
+                freqMultiplier = n;
+              } else if (waveMode === 'sawtooth') {
+                n = i + 1;
+                const sign = n % 2 === 0 ? -1 : 1;
+                radius = baseRadius * (2 / (n * Math.PI)) * sign;
+                freqMultiplier = n;
+              } else {
+                n = i + 1;
+                radius = (baseRadius * 0.72) / Math.pow(1.45, i);
+                freqMultiplier = i % 2 === 0 ? n : -n * 1.5;
+              }
+
+              x += radius * Math.cos(freqMultiplier * time);
+              y += radius * Math.sin(freqMultiplier * time);
+
+              ctx.beginPath();
+              ctx.arc(prevX, prevY, Math.abs(radius), 0, Math.PI * 2);
+              ctx.strokeStyle = i === 0 ? 'rgba(2, 132, 199, 0.36)' : 'rgba(56, 189, 248, 0.22)';
+              ctx.lineWidth = i === 0 ? 1.5 : 1;
+              ctx.stroke();
+
+              ctx.beginPath();
+              ctx.moveTo(prevX, prevY);
+              ctx.lineTo(x, y);
+              ctx.strokeStyle = 'rgba(15, 23, 42, 0.65)';
+              ctx.lineWidth = 1.4;
+              ctx.stroke();
+
+              ctx.beginPath();
+              ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+              ctx.fillStyle = '#0284c7';
+              ctx.fill();
+            }
+
+            const waveStartX = width < 480 ? width * 0.56 : width * 0.52;
+            if (isRunning) {
+              waveTrail.unshift(y);
+              if (waveTrail.length > 260) waveTrail.pop();
+              time += 0.024 * waveSpeed;
+            }
+
+            ctx.beginPath();
+            ctx.setLineDash([4, 4]);
+            ctx.moveTo(x, y);
+            ctx.lineTo(waveStartX, waveTrail[0] ?? y);
+            ctx.strokeStyle = 'rgba(2, 132, 199, 0.55)';
+            ctx.lineWidth = 1.25;
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.beginPath();
+            ctx.arc(x, y, 4.5, 0, Math.PI * 2);
+            ctx.fillStyle = '#0ea5e9';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x, y, 8, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(14, 165, 233, 0.22)';
+            ctx.fill();
+
+            if (waveTrail.length > 1) {
+              ctx.beginPath();
+              for (let i = 0; i < waveTrail.length; i++) {
+                const px = waveStartX + i * 1.45;
+                if (px > width - 12) break;
+                if (i === 0) ctx.moveTo(px, waveTrail[i]);
+                else ctx.lineTo(px, waveTrail[i]);
+              }
+              ctx.strokeStyle = '#0369a1';
+              ctx.lineWidth = 2.4;
+              ctx.stroke();
+            }
+          }
+          requestAnimationFrame(renderFourier);
+        }
+
+        requestAnimationFrame(renderFourier);
+
+        // UI bindings
+        const harmonicsSlider = document.getElementById('harmonics-slider');
+        const speedSlider = document.getElementById('speed-slider');
+        harmonicsSlider.addEventListener('input', (e) => {
+          harmonics = Number(e.target.value);
+          document.getElementById('harmonics-val').textContent = harmonics;
+          document.getElementById('fourier-n-badge').textContent = `N = ${harmonics} harmonics`;
+        });
+        speedSlider.addEventListener('input', (e) => {
+          waveSpeed = Number(e.target.value);
+          document.getElementById('speed-val').textContent = `${waveSpeed.toFixed(1)}x`;
+          document.getElementById('fourier-w-badge').textContent = `ω = ${waveSpeed.toFixed(1)}x`;
+        });
+
+        document.querySelectorAll('.wave-preset-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            waveMode = btn.getAttribute('data-wave');
+            waveTrail = [];
+            document.querySelectorAll('.wave-preset-btn').forEach((b) => {
+              b.className =
+                b === btn
+                  ? 'wave-preset-btn px-3 py-1 rounded-full text-xs font-semibold transition-colors bg-emerald-400 text-slate-950'
+                  : 'wave-preset-btn px-3 py-1 rounded-full text-xs font-medium transition-colors text-slate-300 hover:text-white';
+            });
+          });
+        });
+
+        document.getElementById('fourier-toggle-btn').addEventListener('click', () => {
+          isRunning = !isRunning;
+          document.getElementById('fourier-toggle-label').textContent = isRunning ? 'Pause' : 'Run';
+        });
+
+        document.getElementById('fourier-reset-btn').addEventListener('click', () => {
+          harmonics = 5;
+          waveSpeed = 1.2;
+          waveMode = 'square';
+          isRunning = true;
+          waveTrail = [];
+          harmonicsSlider.value = '5';
+          speedSlider.value = '1.2';
+          document.getElementById('harmonics-val').textContent = '5';
+          document.getElementById('speed-val').textContent = '1.2x';
+          document.getElementById('fourier-n-badge').textContent = 'N = 5 harmonics';
+          document.getElementById('fourier-w-badge').textContent = 'ω = 1.2x';
+          document.getElementById('fourier-toggle-label').textContent = 'Pause';
+          document.querySelectorAll('.wave-preset-btn').forEach((b) => {
+            const isSq = b.getAttribute('data-wave') === 'square';
+            b.className = isSq
+              ? 'wave-preset-btn px-3 py-1 rounded-full text-xs font-semibold transition-colors bg-emerald-400 text-slate-950'
+              : 'wave-preset-btn px-3 py-1 rounded-full text-xs font-medium transition-colors text-slate-300 hover:text-white';
+          });
+        });
+      }
+
+      // -----------------------------------------------------------------------
+      // 4. CURSOR RADIAL SPOTLIGHT & SMOOTH 3D PERSPECTIVE TILT ON GLASSCARDS
+      // -----------------------------------------------------------------------
+      function bindTiltCards() {
+        document.querySelectorAll('.interactive-tilt-card').forEach((card) => {
+          if (card._boundTilt) return;
+          card._boundTilt = true;
+
+          card.addEventListener('pointermove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const normX = (x / rect.width - 0.5) * 2;
+            const normY = (y / rect.height - 0.5) * 2;
+            const rotateY = (normX * 4).toFixed(2);
+            const rotateX = (-normY * 4).toFixed(2);
+
+            if (card._tiltRaf) cancelAnimationFrame(card._tiltRaf);
+            card._tiltRaf = requestAnimationFrame(() => {
+              card.style.setProperty('--spot-x', `${x}px`);
+              card.style.setProperty('--spot-y', `${y}px`);
+              card.style.setProperty('--spot-opacity', '1');
+              card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(0)`;
+            });
+          });
+
+          card.addEventListener('pointerleave', () => {
+            if (card._tiltRaf) cancelAnimationFrame(card._tiltRaf);
+            card._tiltRaf = requestAnimationFrame(() => {
+              card.style.setProperty('--spot-opacity', '0');
+              card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) translateZ(0)';
+            });
+          });
+        });
+      }
+
+      // -----------------------------------------------------------------------
+      // 5. ULTRA-SMOOTH INERTIA SCROLL ("SITE ROLLING"), PARALLAX & REVEALS
+      // -----------------------------------------------------------------------
+      function initScrollChoreography() {
+        const prefersReducedMotion =
+          window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const sections = ['lab', 'work', 'stack', 'contact'];
+        const topBar = document.getElementById('top-scroll-bar');
+        const navBar = document.getElementById('nav-scroll-bar');
+        const heroSection = document.getElementById('hero-section');
+
+        const SCROLL_TUNING = {
+          damping: 0.085,
+          velocitySkewFactor: 0.045,
+          parallaxRange: 28
+        };
+
+        let lastUiSync = 0;
+
+        function tickInertia(now) {
+          const currentY = window.scrollY;
+          const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+          scrollState.targetProgress = Math.min(1, Math.max(0, currentY / maxScroll));
+
+          const rawDelta = currentY - scrollState.lastY;
+          scrollState.lastY = currentY;
+          scrollState.velocity += (rawDelta - scrollState.velocity) * 0.18;
+
+          if (prefersReducedMotion) {
+            scrollState.smoothProgress = scrollState.targetProgress;
+            scrollState.velocity = 0;
+          } else {
+            scrollState.smoothProgress +=
+              (scrollState.targetProgress - scrollState.smoothProgress) * SCROLL_TUNING.damping;
+          }
+
+          if (!prefersReducedMotion) {
+            const clampedVel = Math.max(-35, Math.min(35, scrollState.velocity));
+            const skewDeg = (clampedVel * SCROLL_TUNING.velocitySkewFactor).toFixed(3);
+            document.querySelectorAll('[data-speed]').forEach((node) => {
+              const speed = parseFloat(node.getAttribute('data-speed') || '0');
+              const rect = node.getBoundingClientRect();
+              const viewportCenterOffset =
+                (rect.top + rect.height * 0.5 - window.innerHeight * 0.5) /
+                Math.max(1, window.innerHeight);
+              const translateY = (
+                viewportCenterOffset *
+                speed *
+                SCROLL_TUNING.parallaxRange
+              ).toFixed(2);
+              node.style.transform = `translate3d(0, ${translateY}px, 0) skewY(${skewDeg}deg)`;
+            });
+
+            if (heroSection) {
+              const hp = Math.min(1, currentY / 680);
+              heroSection.style.transform = `translate3d(0, ${-hp * 22}px, 0) scale(${1 - hp * 0.025})`;
+              heroSection.style.opacity = String(Math.max(0.35, 1 - hp * 0.55));
+            }
+          }
+
+          if (now - lastUiSync > 32) {
+            lastUiSync = now;
+            const pct = `${(scrollState.smoothProgress * 100).toFixed(2)}%`;
+            if (topBar) topBar.style.width = pct;
+            if (navBar) navBar.style.width = pct;
+
+            const scrollPos = currentY + 190;
+            for (const secId of sections) {
+              const el = document.getElementById(secId);
+              if (el && scrollPos >= el.offsetTop && scrollPos < el.offsetTop + el.offsetHeight) {
+                document.querySelectorAll('.nav-pill-btn').forEach((btn) => {
+                  const isAct = btn.getAttribute('data-nav') === secId;
+                  btn.className = isAct
+                    ? 'nav-pill-btn px-3 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 bg-white/15 text-white border border-white/20 shadow-[inset_0_1px_0_rgba(255,255,255,0.25)]'
+                    : 'nav-pill-btn px-3 sm:px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-medium transition-colors duration-150 text-slate-300 hover:text-white hover:bg-white/10 border border-transparent';
+                });
+                break;
+              }
+            }
+          }
+
+          requestAnimationFrame(tickInertia);
+        }
+
+        const revealObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('is-revealed');
+              }
+            });
+          },
+          { threshold: 0.1, rootMargin: '0px 0px -36px 0px' }
+        );
+
+        document.querySelectorAll('[data-cloud-reveal]').forEach((el) => revealObserver.observe(el));
+
+        document.querySelectorAll('.nav-pill-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const target = document.getElementById(btn.getAttribute('data-nav'));
+            if (target) target.scrollIntoView({ behavior: 'smooth' });
+          });
+        });
+
+        document.getElementById('brand-top-btn').addEventListener('click', (e) => {
+          e.preventDefault();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        requestAnimationFrame(tickInertia);
+      }
+
+      // -----------------------------------------------------------------------
+      // 6. THREE.JS 3D VOLUMETRIC RAYMARCHED CLOUDS + 105K INSTANCED GRASS FIELD
+      // -----------------------------------------------------------------------
+      function initThreeScene() {
+        const container = document.getElementById('three-meadow-container');
+        if (!container || typeof THREE === 'undefined') return;
+
+        const prefersReducedMotion =
+          window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const isMobile = window.innerWidth < 768;
+
+        const GRASS_CONFIG = {
+          bladeCount: prefersReducedMotion ? 28000 : isMobile ? 55000 : 105000,
+          fieldWidth: 46,
+          fieldDepth: 42,
+          bladeSegments: 6,
+          windSpeed: prefersReducedMotion ? 0.0 : 1.15,
+          windStrength: 0.48,
+          cursorRadius: 3.4,
+          cursorStrength: 1.55,
+          colorRoot: new THREE.Color('#091306'),
+          colorMid: new THREE.Color('#234a13'),
+          colorTip: new THREE.Color('#8ac936'),
+          colorSunSubsurface: new THREE.Color('#f7e883'),
+          fogColor: new THREE.Color('#8bb8d8'),
+          fogDensity: 0.036
+        };
+
+        const SKY_CLOUD_CONFIG = {
+          cloudDensity: 0.56,
+          cloudCoverage: 0.52,
+          windDriftSpeed: prefersReducedMotion ? 0.0 : 0.065,
+          morphSpeed: prefersReducedMotion ? 0.0 : 0.045,
+          sunDirection: new THREE.Vector3(0.46, 0.36, -0.81).normalize(),
+          zenithColor: new THREE.Color('#5fa8dc'),
+          horizonColor: new THREE.Color('#e6f4ff'),
+          sunGlowColor: new THREE.Color('#fff5cc'),
+          cloudLitColor: new THREE.Color('#ffffff'),
+          cloudShadowColor: new THREE.Color('#8ba8c7')
+        };
+
+        const SCROLL_ATMOS = {
+          morning: {
+            zenith: new THREE.Color('#5fa8dc'),
+            horizon: new THREE.Color('#e6f4ff'),
+            sunGlow: new THREE.Color('#fff5cc'),
+            cloudLit: new THREE.Color('#ffffff'),
+            cloudShadow: new THREE.Color('#8ba8c7'),
+            fog: new THREE.Color('#8bb8d8'),
+            fogDensity: 0.036,
+            sunY: 0.36
+          },
+          golden: {
+            zenith: new THREE.Color('#2c5282'),
+            horizon: new THREE.Color('#fbd38d'),
+            sunGlow: new THREE.Color('#ffcf70'),
+            cloudLit: new THREE.Color('#fff1d6'),
+            cloudShadow: new THREE.Color('#6b5b7b'),
+            fog: new THREE.Color('#9c7a6b'),
+            fogDensity: 0.032,
+            sunY: 0.22
+          },
+          twilight: {
+            zenith: new THREE.Color('#0b132b'),
+            horizon: new THREE.Color('#1c2541'),
+            sunGlow: new THREE.Color('#6fffe9'),
+            cloudLit: new THREE.Color('#3a506b'),
+            cloudShadow: new THREE.Color('#0b132b'),
+            fog: new THREE.Color('#111827'),
+            fogDensity: 0.044,
+            sunY: 0.09
+          }
+        };
+
+        const tmpZenith = new THREE.Color();
+        const tmpHorizon = new THREE.Color();
+        const tmpSunGlow = new THREE.Color();
+        const tmpCloudLit = new THREE.Color();
+        const tmpCloudShadow = new THREE.Color();
+        const tmpFog = new THREE.Color();
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(GRASS_CONFIG.fogColor, GRASS_CONFIG.fogDensity);
+
+        const camera = new THREE.PerspectiveCamera(
+          46,
+          container.clientWidth / Math.max(container.clientHeight, 1),
+          0.1,
+          260
+        );
+        const baseCamPos = new THREE.Vector3(0, 1.85, 13.5);
+        camera.position.copy(baseCamPos);
+        camera.lookAt(0, 0.85, -4.0);
+
+        let renderer;
+        try {
+          renderer = new THREE.WebGLRenderer({
+            antialias: true,
+            powerPreference: 'high-performance',
+            stencil: false
+          });
+        } catch {
+          return;
+        }
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        container.innerHTML = '';
+        container.appendChild(renderer.domElement);
+
+        const hemiLight = new THREE.HemisphereLight('#e0f2fe', '#12240d', 1.05);
+        scene.add(hemiLight);
+
+        const sunDirection = SKY_CLOUD_CONFIG.sunDirection;
+        const dirLight = new THREE.DirectionalLight('#fff5d6', 2.35);
+        dirLight.position.copy(sunDirection).multiplyScalar(35);
+        scene.add(dirLight);
+
+        // Volumetric 3D Raymarched Cloud Sky Dome
+        const skyUniforms = {
+          uTime: { value: 0 },
+          uCloudDensity: { value: SKY_CLOUD_CONFIG.cloudDensity },
+          uCloudCoverage: { value: SKY_CLOUD_CONFIG.cloudCoverage },
+          uWindDriftSpeed: { value: SKY_CLOUD_CONFIG.windDriftSpeed },
+          uMorphSpeed: { value: SKY_CLOUD_CONFIG.morphSpeed },
+          uSunDir: { value: sunDirection },
+          uZenithColor: { value: SKY_CLOUD_CONFIG.zenithColor },
+          uHorizonColor: { value: SKY_CLOUD_CONFIG.horizonColor },
+          uSunGlowColor: { value: SKY_CLOUD_CONFIG.sunGlowColor },
+          uCloudLitColor: { value: SKY_CLOUD_CONFIG.cloudLitColor },
+          uCloudShadowColor: { value: SKY_CLOUD_CONFIG.cloudShadowColor },
+          uFogColor: { value: GRASS_CONFIG.fogColor },
+          uCamOffset: { value: new THREE.Vector2(0, 0) }
+        };
+
+        const skyVertexShader = `
+          varying vec3 vWorldDir;
+          void main() {
+            vec4 worldPos = modelMatrix * vec4(position, 1.0);
+            vWorldDir = worldPos.xyz - cameraPosition;
+            gl_Position = projectionMatrix * viewMatrix * worldPos;
+          }
+        `;
+
+        const skyFragmentShader = `
+          uniform float uTime;
+          uniform float uCloudDensity;
+          uniform float uCloudCoverage;
+          uniform float uWindDriftSpeed;
+          uniform float uMorphSpeed;
+          uniform vec3 uSunDir;
+          uniform vec3 uZenithColor;
+          uniform vec3 uHorizonColor;
+          uniform vec3 uSunGlowColor;
+          uniform vec3 uCloudLitColor;
+          uniform vec3 uCloudShadowColor;
+          uniform vec3 uFogColor;
+          uniform vec2 uCamOffset;
+
+          varying vec3 vWorldDir;
+
+          float hash31(vec3 p) {
+            p = fract(p * vec3(443.8975, 397.2973, 491.1871));
+            p += dot(p, p.yxz + 19.19);
+            return fract((p.x + p.y) * p.z);
+          }
+
+          float noise3D(vec3 p) {
+            vec3 i = floor(p);
+            vec3 f = fract(p);
+            f = f * f * (3.0 - 2.0 * f);
+
+            float n000 = hash31(i + vec3(0.0, 0.0, 0.0));
+            float n100 = hash31(i + vec3(1.0, 0.0, 0.0));
+            float n010 = hash31(i + vec3(0.0, 1.0, 0.0));
+            float n110 = hash31(i + vec3(1.0, 1.0, 0.0));
+            float n001 = hash31(i + vec3(0.0, 0.0, 1.0));
+            float n101 = hash31(i + vec3(1.0, 0.0, 1.0));
+            float n011 = hash31(i + vec3(0.0, 1.0, 1.0));
+            float n111 = hash31(i + vec3(1.0, 1.0, 1.0));
+
+            float nx00 = mix(n000, n100, f.x);
+            float nx10 = mix(n010, n110, f.x);
+            float nx01 = mix(n001, n101, f.x);
+            float nx11 = mix(n011, n111, f.x);
+
+            float nxy0 = mix(nx00, nx10, f.y);
+            float nxy1 = mix(nx01, nx11, f.y);
+
+            return mix(nxy0, nxy1, f.z);
+          }
+
+          float fbmClouds(vec3 p) {
+            float value = 0.0;
+            float amp = 0.53;
+            vec3 shift = vec3(100.0);
+            for (int i = 0; i < 4; i++) {
+              value += amp * noise3D(p);
+              p = p * 2.06 + shift;
+              amp *= 0.48;
+            }
+            return value;
+          }
+
+          float henyeyGreenstein(float cosTheta, float g) {
+            float g2 = g * g;
+            return (1.0 - g2) / (4.0 * 3.14159265 * pow(max(0.001, 1.0 + g2 - 2.0 * g * cosTheta), 1.5));
+          }
+
+          float sampleCloudDensity(vec3 pos, float heightNorm) {
+            vec3 windOffset = vec3(uTime * uWindDriftSpeed, uTime * uMorphSpeed * 0.35, -uTime * uWindDriftSpeed * 0.55);
+            vec3 q = pos * 0.042 + windOffset;
+
+            float baseFbm = fbmClouds(q);
+            float detailWisps = noise3D(q * 2.4 - windOffset * 1.4);
+            float combined = baseFbm * 0.82 + detailWisps * 0.18;
+
+            float bottomProfile = smoothstep(0.0, 0.22, heightNorm);
+            float topProfile = smoothstep(1.0, 0.42, heightNorm);
+            float altitudeMask = bottomProfile * topProfile;
+
+            float rawDensity = (combined * altitudeMask) - (1.0 - uCloudCoverage) * 0.56;
+            return clamp(rawDensity * uCloudDensity * 4.2, 0.0, 1.0);
+          }
+
+          void main() {
+            vec3 rd = normalize(vWorldDir);
+            float up = clamp(rd.y, 0.0, 1.0);
+
+            vec3 skyCol = mix(uHorizonColor, uZenithColor, pow(up, 0.58));
+
+            float sunDot = max(dot(rd, normalize(uSunDir)), 0.0);
+            float sunDisc = smoothstep(0.9965, 0.9994, sunDot);
+            float sunHalo = pow(sunDot, 10.0) * 0.42 + pow(sunDot, 64.0) * 0.55;
+            skyCol += uSunGlowColor * (sunHalo + sunDisc * 1.8);
+
+            if (rd.y > 0.015) {
+              float cloudBottom = 14.0;
+              float cloudTop = 42.0;
+              float tStart = cloudBottom / rd.y;
+              float tEnd = min(cloudTop / rd.y, 260.0);
+
+              const int STEPS = 18;
+              float dt = (tEnd - tStart) / float(STEPS);
+              float jitter = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+              float t = tStart + jitter * dt;
+
+              vec3 camOrigin = vec3(uCamOffset.x * 8.0, 2.0, uCamOffset.y * 8.0);
+              float transmittance = 1.0;
+              vec3 scatteredLight = vec3(0.0);
+
+              float hgForward = henyeyGreenstein(dot(rd, normalize(uSunDir)), 0.62);
+              float hgBack = henyeyGreenstein(dot(rd, normalize(uSunDir)), -0.25);
+              float phase = mix(hgBack, hgForward, 0.72);
+
+              for (int i = 0; i < STEPS; i++) {
+                if (transmittance < 0.02 || t > tEnd) break;
+
+                vec3 samplePos = camOrigin + rd * t;
+                float hNorm = clamp((samplePos.y - cloudBottom) / (cloudTop - cloudBottom), 0.0, 1.0);
+                float dens = sampleCloudDensity(samplePos, hNorm);
+
+                if (dens > 0.004) {
+                  vec3 lightSamplePos = samplePos + normalize(uSunDir) * 3.8;
+                  float lightHNorm = clamp((lightSamplePos.y - cloudBottom) / (cloudTop - cloudBottom), 0.0, 1.0);
+                  float lightDens = sampleCloudDensity(lightSamplePos, lightHNorm);
+
+                  float shadow = exp(-lightDens * 2.4);
+                  float silverLining = exp(-dens * 3.2) * pow(sunDot, 3.0) * 1.35;
+                  float heightLight = mix(0.45, 1.08, hNorm);
+
+                  vec3 baseCloudColor = mix(uCloudShadowColor, uCloudLitColor, clamp(shadow * heightLight, 0.0, 1.0));
+                  vec3 luminance = baseCloudColor + uSunGlowColor * (phase * shadow * 0.55 + silverLining);
+
+                  float stepExtinction = exp(-dens * dt * 0.14);
+                  scatteredLight += transmittance * luminance * (1.0 - stepExtinction);
+                  transmittance *= stepExtinction;
+                }
+                t += dt;
+              }
+
+              float horizonFade = smoothstep(0.015, 0.16, rd.y);
+              vec3 cloudFinal = skyCol * transmittance + scatteredLight;
+              skyCol = mix(skyCol, cloudFinal, horizonFade);
+            }
+
+            float groundBlend = smoothstep(-0.04, 0.08, rd.y);
+            skyCol = mix(uFogColor, skyCol, groundBlend);
+
+            gl_FragColor = vec4(skyCol, 1.0);
+          }
+        `;
+
+        const skyDomeGeo = new THREE.SphereGeometry(210, 48, 32);
+        const skyDomeMat = new THREE.ShaderMaterial({
+          uniforms: skyUniforms,
+          vertexShader: skyVertexShader,
+          fragmentShader: skyFragmentShader,
+          side: THREE.BackSide,
+          depthWrite: false
+        });
+        scene.add(new THREE.Mesh(skyDomeGeo, skyDomeMat));
+
+        // Uneven Soil/Moss Ground Plane
+        const groundGeo = new THREE.PlaneGeometry(
+          GRASS_CONFIG.fieldWidth * 1.4,
+          GRASS_CONFIG.fieldDepth * 1.4,
+          72,
+          72
+        );
+        groundGeo.rotateX(-Math.PI / 2);
+        const gPos = groundGeo.attributes.position;
+        const terrainHeightAt = (x, z) =>
+          Math.sin(x * 0.14) * Math.cos(z * 0.14) * 0.28 +
+          Math.sin(x * 0.35 + z * 0.27) * 0.11;
+
+        for (let i = 0; i < gPos.count; i++) {
+          const gx = gPos.getX(i);
+          const gz = gPos.getZ(i);
+          gPos.setY(i, terrainHeightAt(gx, gz) - 0.03);
+        }
+        groundGeo.computeVertexNormals();
+
+        const groundMat = new THREE.MeshStandardMaterial({
+          color: '#0a1207',
+          roughness: 0.96,
+          metalness: 0.02
+        });
+        scene.add(new THREE.Mesh(groundGeo, groundMat));
+
+        // Instanced Tapered Grass Blades (105,000 in 1 draw call)
+        const segs = GRASS_CONFIG.bladeSegments;
+        const basePositions = [];
+        const baseUvs = [];
+        const baseIndices = [];
+
+        for (let s = 0; s <= segs; s++) {
+          const v = s / segs;
+          const halfWidth = 0.5 * Math.pow(1.0 - v, 0.78);
+          const zCurve = Math.pow(v, 1.85) * 0.18;
+
+          basePositions.push(-halfWidth, v, zCurve);
+          basePositions.push(halfWidth, v, zCurve);
+          baseUvs.push(0, v);
+          baseUvs.push(1, v);
+
+          if (s < segs) {
+            const row = s * 2;
+            baseIndices.push(row, row + 1, row + 2);
+            baseIndices.push(row + 1, row + 3, row + 2);
+          }
+        }
+
+        const instancedGeo = new THREE.InstancedBufferGeometry();
+        instancedGeo.setAttribute('position', new THREE.Float32BufferAttribute(basePositions, 3));
+        instancedGeo.setAttribute('uv', new THREE.Float32BufferAttribute(baseUvs, 2));
+        instancedGeo.setIndex(baseIndices);
+
+        const count = GRASS_CONFIG.bladeCount;
+        const offsets = new Float32Array(count * 3);
+        const scales = new Float32Array(count * 2);
+        const orientations = new Float32Array(count * 2);
+        const randomSeeds = new Float32Array(count);
+
+        let seed = 1337;
+        const rand = () => {
+          seed = (seed * 16807) % 2147483647;
+          return (seed - 1) / 2147483646;
+        };
+
+        for (let i = 0; i < count; i++) {
+          const rx = (rand() - 0.5) * GRASS_CONFIG.fieldWidth;
+          const rzRaw = Math.pow(rand(), 0.88);
+          const rz = 13.0 - rzRaw * GRASS_CONFIG.fieldDepth;
+          const ry = terrainHeightAt(rx, rz);
+
+          offsets[i * 3 + 0] = rx;
+          offsets[i * 3 + 1] = ry;
+          offsets[i * 3 + 2] = rz;
+
+          const clump = 0.5 + 0.5 * Math.sin(rx * 0.45) * Math.cos(rz * 0.45);
+          scales[i * 2 + 0] = 0.042 + rand() * 0.036;
+          scales[i * 2 + 1] = 0.58 + rand() * 0.68 + clump * 0.28;
+
+          orientations[i * 2 + 0] = rand() * Math.PI * 2;
+          orientations[i * 2 + 1] = 0.12 + rand() * 0.34;
+          randomSeeds[i] = rand();
+        }
+
+        instancedGeo.setAttribute('aOffset', new THREE.InstancedBufferAttribute(offsets, 3));
+        instancedGeo.setAttribute('aScale', new THREE.InstancedBufferAttribute(scales, 2));
+        instancedGeo.setAttribute('aOrientation', new THREE.InstancedBufferAttribute(orientations, 2));
+        instancedGeo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(randomSeeds, 1));
+        instancedGeo.maxInstancedCount = count;
+
+        const uniforms = {
+          uTime: { value: 0 },
+          uWindSpeed: { value: GRASS_CONFIG.windSpeed },
+          uWindStrength: { value: GRASS_CONFIG.windStrength },
+          uMouseWorld: { value: new THREE.Vector3(999, 0, 999) },
+          uCursorRadius: { value: GRASS_CONFIG.cursorRadius },
+          uCursorStrength: { value: GRASS_CONFIG.cursorStrength },
+          uSunDir: { value: sunDirection },
+          uColorRoot: { value: GRASS_CONFIG.colorRoot },
+          uColorMid: { value: GRASS_CONFIG.colorMid },
+          uColorTip: { value: GRASS_CONFIG.colorTip },
+          uColorSunSubsurface: { value: GRASS_CONFIG.colorSunSubsurface },
+          uFogColor: { value: GRASS_CONFIG.fogColor },
+          uFogDensity: { value: GRASS_CONFIG.fogDensity }
+        };
+
+        const vertexShader = `
+          uniform float uTime;
+          uniform float uWindSpeed;
+          uniform float uWindStrength;
+          uniform vec3 uMouseWorld;
+          uniform float uCursorRadius;
+          uniform float uCursorStrength;
+
+          attribute vec3 aOffset;
+          attribute vec2 aScale;
+          attribute vec2 aOrientation;
+          attribute float aSeed;
+
+          varying float vHeightRatio;
+          varying float vSeed;
+          varying vec3 vWorldNormal;
+          varying vec3 vWorldPos;
+          varying float vFogDepth;
+
+          vec3 permute(vec3 x) { return mod(((x * 34.0) + 1.0) * x, 289.0); }
+          float snoise(vec2 v) {
+            const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                                -0.577350269189626, 0.024390243902439);
+            vec2 i  = floor(v + dot(v, C.yy));
+            vec2 x0 = v - i + dot(i, C.xx);
+            vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+            vec4 x12 = x0.xyxy + C.xxzz;
+            x12.xy -= i1;
+            i = mod(i, 289.0);
+            vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+            vec3 m = max(0.5 - vec3(dot(x0, x0), dot(x12.xy, x12.xy), dot(x12.zw, x12.zw)), 0.0);
+            m = m * m;
+            m = m * m;
+            vec3 x = 2.0 * fract(p * C.www) - 1.0;
+            vec3 h = abs(x) - 0.5;
+            vec3 ox = floor(x + 0.5);
+            vec3 a0 = x - ox;
+            m *= 1.79284291400159 - 0.85373472095314 * (a0 * a0 + h * h);
+            vec3 g;
+            g.x  = a0.x  * x0.x  + h.x  * x0.y;
+            g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+            return 130.0 * dot(m, g);
+          }
+
+          mat2 rotate2D(float angle) {
+            float s = sin(angle);
+            float c = cos(angle);
+            return mat2(c, -s, s, c);
+          }
+
+          void main() {
+            float h = uv.y;
+            vHeightRatio = h;
+            vSeed = aSeed;
+
+            float bendFactor = h * h;
+            vec3 pos = vec3(
+              position.x * aScale.x,
+              position.y * aScale.y,
+              position.z * aScale.y
+            );
+
+            pos.z += bendFactor * aOrientation.y * aScale.y;
+            float yaw = aOrientation.x;
+            pos.xz = rotate2D(yaw) * pos.xz;
+
+            float t = uTime * uWindSpeed;
+            float primaryGust = snoise(aOffset.xz * 0.075 + vec2(t * 0.42, t * 0.24));
+            float secondaryRipple = snoise(aOffset.xz * 0.22 - vec2(t * 0.78, -t * 0.35));
+            float microFlutter = sin(t * 3.4 + aSeed * 25.0 + aOffset.x * 1.3) * 0.08;
+
+            vec2 windDir = normalize(vec2(0.85, 0.45));
+            float windAmount = (primaryGust * 0.72 + secondaryRipple * 0.34 + microFlutter) * uWindStrength;
+            vec2 windDisplacement = windDir * (windAmount + 0.16) * bendFactor * aScale.y;
+
+            pos.xz += windDisplacement;
+            pos.y -= length(windDisplacement) * 0.24 * bendFactor;
+
+            vec2 toBlade = aOffset.xz - uMouseWorld.xz;
+            float distToMouse = length(toBlade);
+            float falloff = smoothstep(uCursorRadius, 0.0, distToMouse);
+            falloff = falloff * falloff;
+            vec2 pushDir = distToMouse > 0.001 ? (toBlade / distToMouse) : vec2(0.0, 1.0);
+            vec2 cursorPush = pushDir * falloff * uCursorStrength * bendFactor * aScale.y;
+            pos.xz += cursorPush;
+            pos.y -= falloff * 0.22 * bendFactor * aScale.y;
+
+            vec3 worldPosition = aOffset + pos;
+            vWorldPos = worldPosition;
+
+            vec3 localNormal = normalize(vec3(
+              position.x * 1.4,
+              0.35 + (1.0 - h) * 0.35,
+              0.85
+            ));
+            localNormal.xz = rotate2D(yaw) * localNormal.xz;
+            localNormal.xz += (windDisplacement + cursorPush) * 0.65;
+            vWorldNormal = normalize(localNormal);
+
+            vec4 mvPosition = modelViewMatrix * vec4(worldPosition, 1.0);
+            vFogDepth = -mvPosition.z;
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `;
+
+        const fragmentShader = `
+          uniform vec3 uSunDir;
+          uniform vec3 uColorRoot;
+          uniform vec3 uColorMid;
+          uniform vec3 uColorTip;
+          uniform vec3 uColorSunSubsurface;
+          uniform vec3 uFogColor;
+          uniform float uFogDensity;
+
+          varying float vHeightRatio;
+          varying float vSeed;
+          varying vec3 vWorldNormal;
+          varying vec3 vWorldPos;
+          varying float vFogDepth;
+
+          void main() {
+            vec3 normal = normalize(vWorldNormal);
+            if (!gl_FrontFacing) {
+              normal = -normal;
+            }
+
+            vec3 viewDir = normalize(cameraPosition - vWorldPos);
+
+            vec3 baseGrad = mix(uColorRoot, uColorMid, smoothstep(0.0, 0.48, vHeightRatio));
+            vec3 tipGrad = mix(baseGrad, uColorTip, smoothstep(0.38, 1.0, vHeightRatio));
+
+            vec3 hueShift = mix(vec3(0.92, 0.98, 0.90), vec3(1.10, 1.05, 0.84), vSeed);
+            vec3 albedo = tipGrad * hueShift;
+
+            float rootAO = mix(0.22, 1.0, smoothstep(0.0, 0.42, vHeightRatio));
+
+            float ndotl = max(dot(normal, uSunDir), 0.0);
+            vec3 diffuse = albedo * (0.42 + ndotl * 0.78);
+
+            float backLight = pow(clamp(dot(viewDir, -uSunDir), 0.0, 1.0), 3.0);
+            float tipTranslucency = smoothstep(0.32, 1.0, vHeightRatio);
+            vec3 subsurface = uColorSunSubsurface * backLight * tipTranslucency * 0.78;
+
+            float rim = pow(1.0 - max(dot(normal, viewDir), 0.0), 2.8) * tipTranslucency;
+            vec3 rimGlow = uColorSunSubsurface * rim * 0.26;
+
+            vec3 finalColor = (diffuse + subsurface + rimGlow) * rootAO;
+
+            float fogFactor = 1.0 - exp(-uFogDensity * uFogDensity * vFogDepth * vFogDepth);
+            finalColor = mix(finalColor, uFogColor, clamp(fogFactor, 0.0, 1.0));
+
+            gl_FragColor = vec4(finalColor, 1.0);
+          }
+        `;
+
+        const grassMaterial = new THREE.ShaderMaterial({
+          uniforms,
+          vertexShader,
+          fragmentShader,
+          side: THREE.DoubleSide
+        });
+
+        const grassMesh = new THREE.Mesh(instancedGeo, grassMaterial);
+        grassMesh.frustumCulled = false;
+        scene.add(grassMesh);
+
+        const raycaster = new THREE.Raycaster();
+        const ndcMouse = new THREE.Vector2(999, 999);
+        const smoothMouseNdc = new THREE.Vector2(0, 0);
+        const groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+        const targetMouseWorld = new THREE.Vector3(999, 0, 999);
+        const currentMouseWorld = new THREE.Vector3(999, 0, 999);
+        let pointerInView = false;
+
+        const updateMouseCoords = (clientX, clientY) => {
+          ndcMouse.x = (clientX / window.innerWidth) * 2 - 1;
+          ndcMouse.y = -(clientY / window.innerHeight) * 2 + 1;
+          pointerInView = true;
+        };
+
+        window.addEventListener('pointermove', (e) => updateMouseCoords(e.clientX, e.clientY), { passive: true });
+        window.addEventListener(
+          'touchmove',
+          (e) => {
+            if (e.touches && e.touches[0]) {
+              updateMouseCoords(e.touches[0].clientX, e.touches[0].clientY);
+            }
+          },
+          { passive: true }
+        );
+        window.addEventListener('pointerleave', () => {
+          pointerInView = false;
+          targetMouseWorld.set(999, 0, 999);
+        });
+
+        window.addEventListener('resize', () => {
+          const w = container.clientWidth;
+          const h = Math.max(container.clientHeight, 1);
+          camera.aspect = w / h;
+          camera.updateProjectionMatrix();
+          renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+          renderer.setSize(w, h);
+        });
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+          if (!document.hidden) {
+            const elapsed = clock.getElapsedTime();
+            uniforms.uTime.value = elapsed;
+            skyUniforms.uTime.value = elapsed;
+
+            const p = prefersReducedMotion ? 0 : scrollState.smoothProgress;
+
+            const targetParallaxX = pointerInView ? ndcMouse.x * 0.95 : 0;
+            const targetParallaxY = pointerInView ? ndcMouse.y * 0.35 : 0;
+            smoothMouseNdc.x += (targetParallaxX - smoothMouseNdc.x) * 0.055;
+            smoothMouseNdc.y += (targetParallaxY - smoothMouseNdc.y) * 0.055;
+
+            skyUniforms.uCamOffset.value.set(
+              smoothMouseNdc.x + p * 1.4,
+              smoothMouseNdc.y + p * 0.8
+            );
+
+            const rollZ = baseCamPos.z - p * 14.5;
+            const rollY = baseCamPos.y + p * 2.15;
+            const lookPitchY = 0.85 + p * 3.85;
+            const lookTargetZ = -4.0 - p * 16.0;
+
+            camera.position.x = baseCamPos.x + smoothMouseNdc.x;
+            camera.position.y = Math.max(1.25, rollY + smoothMouseNdc.y);
+            camera.position.z = rollZ;
+            camera.lookAt(smoothMouseNdc.x * 0.35, lookPitchY, lookTargetZ);
+
+            if (p < 0.5) {
+              const t = p * 2.0;
+              tmpZenith.lerpColors(SCROLL_ATMOS.morning.zenith, SCROLL_ATMOS.golden.zenith, t);
+              tmpHorizon.lerpColors(SCROLL_ATMOS.morning.horizon, SCROLL_ATMOS.golden.horizon, t);
+              tmpSunGlow.lerpColors(SCROLL_ATMOS.morning.sunGlow, SCROLL_ATMOS.golden.sunGlow, t);
+              tmpCloudLit.lerpColors(SCROLL_ATMOS.morning.cloudLit, SCROLL_ATMOS.golden.cloudLit, t);
+              tmpCloudShadow.lerpColors(SCROLL_ATMOS.morning.cloudShadow, SCROLL_ATMOS.golden.cloudShadow, t);
+              tmpFog.lerpColors(SCROLL_ATMOS.morning.fog, SCROLL_ATMOS.golden.fog, t);
+              scene.fog.density = THREE.MathUtils.lerp(SCROLL_ATMOS.morning.fogDensity, SCROLL_ATMOS.golden.fogDensity, t);
+              sunDirection.y = THREE.MathUtils.lerp(SCROLL_ATMOS.morning.sunY, SCROLL_ATMOS.golden.sunY, t);
+            } else {
+              const t = (p - 0.5) * 2.0;
+              tmpZenith.lerpColors(SCROLL_ATMOS.golden.zenith, SCROLL_ATMOS.twilight.zenith, t);
+              tmpHorizon.lerpColors(SCROLL_ATMOS.golden.horizon, SCROLL_ATMOS.twilight.horizon, t);
+              tmpSunGlow.lerpColors(SCROLL_ATMOS.golden.sunGlow, SCROLL_ATMOS.twilight.sunGlow, t);
+              tmpCloudLit.lerpColors(SCROLL_ATMOS.golden.cloudLit, SCROLL_ATMOS.twilight.cloudLit, t);
+              tmpCloudShadow.lerpColors(SCROLL_ATMOS.golden.cloudShadow, SCROLL_ATMOS.twilight.cloudShadow, t);
+              tmpFog.lerpColors(SCROLL_ATMOS.golden.fog, SCROLL_ATMOS.twilight.fog, t);
+              scene.fog.density = THREE.MathUtils.lerp(SCROLL_ATMOS.golden.fogDensity, SCROLL_ATMOS.twilight.fogDensity, t);
+              sunDirection.y = THREE.MathUtils.lerp(SCROLL_ATMOS.golden.sunY, SCROLL_ATMOS.twilight.sunY, t);
+            }
+            sunDirection.normalize();
+            skyUniforms.uZenithColor.value.copy(tmpZenith);
+            skyUniforms.uHorizonColor.value.copy(tmpHorizon);
+            skyUniforms.uSunGlowColor.value.copy(tmpSunGlow);
+            skyUniforms.uCloudLitColor.value.copy(tmpCloudLit);
+            skyUniforms.uCloudShadowColor.value.copy(tmpCloudShadow);
+            skyUniforms.uFogColor.value.copy(tmpFog);
+            uniforms.uFogColor.value.copy(tmpFog);
+            uniforms.uFogDensity.value = scene.fog.density;
+            scene.fog.color.copy(tmpFog);
+
+            if (pointerInView) {
+              raycaster.setFromCamera(ndcMouse, camera);
+              const hit = raycaster.ray.intersectPlane(groundPlane, targetMouseWorld);
+              if (!hit) targetMouseWorld.set(999, 0, 999);
+            }
+            currentMouseWorld.lerp(targetMouseWorld, 0.14);
+            uniforms.uMouseWorld.value.copy(currentMouseWorld);
+
+            renderer.render(scene, camera);
+          }
+          requestAnimationFrame(animate);
+        }
+
+        animate();
+      }
+
+      // Boot everything once DOM & window load
+      window.addEventListener('DOMContentLoaded', () => {
+        renderProjects();
+        renderStack();
+        syncSnippetUI();
+        if (window.lucide) window.lucide.createIcons();
+        bindTiltCards();
+        initFourierLab();
+        initScrollChoreography();
+        initThreeScene();
+      });
+    })();
+  </script>
+</body>
+</html>
